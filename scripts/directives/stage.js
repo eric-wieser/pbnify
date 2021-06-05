@@ -14,25 +14,25 @@
  */
 angular.module('pbnApp')
     .directive('stage', function () {
-	return {
-	    restrict: 'A',
-	    link: function(scope, elem, attr) {
-		var canvas = elem[0];
-		canvas.addEventListener('click', function(event) {
-		    if (scope.step == 'select') {
-			var rect = canvas.getBoundingClientRect();
-			var x = event.clientX - rect.left;
-			var y = event.clientY - rect.top;
+        return {
+            restrict: 'A',
+            link: function(scope, elem, attr) {
+                var canvas = elem[0];
+                canvas.addEventListener('click', function(event) {
+                    if (scope.step == 'select') {
+                        var rect = canvas.getBoundingClientRect();
+                        var x = event.clientX - rect.left;
+                        var y = event.clientY - rect.top;
 
-			var sampler = document.getElementById("samplerSlider").value;
-			var threshold = document.getElementById("similaritySlider").value;
+                        var sampler = document.getElementById("samplerSlider").value;
+                        var threshold = document.getElementById("similaritySlider").value;
 
-			var color = scope.sampleArea(x, y, sampler);
+                        var color = scope.sampleArea(x, y, sampler);
 
-			scope.addColor(color, threshold);
-			scope.$apply();
-		    }
-		});
-	    }
-	};
+                        scope.addColor(color, threshold);
+                        scope.$apply();
+                    }
+                });
+            }
+        };
     });
