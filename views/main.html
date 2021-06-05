@@ -8,10 +8,33 @@
 
 
 <div class="col" ng-show="step == 'load'">
+  <input type="checkbox" id="resizeCheckbox">
   <label id="widthSliderLabel" for="widthSlider">Resize width to:
   <span id="widthSliderNumber">800</span>px</label>
   <input type="range" min="400" max="2000" step="10" value="800" id="widthSlider"
 	 oninput="document.getElementById('widthSliderNumber').innerHTML = this.value;">
+  <span id="widthSliderLabel">800</span>px
+</div>
+
+<div class="col" ng-show="step == 'select'">
+  <label for="samplerSlider">Sample size:</label>
+  <input type="range" min="0" max="5" step="1" value="3" id="samplerSlider"
+	 oninput="document.getElementById('samplerSliderLabel').innerHTML = this.value;">
+  <span id="samplerSliderLabel">3</span>px
+</div>
+
+<div class="col" ng-show="step == 'select'">
+  <label for="similaritylider">Similarity threshold:</label>
+  <input type="range" min="0" max="1000" step="1" value="0" id="similaritySlider"
+	 oninput="document.getElementById('similaritySliderLabel').innerHTML = this.value;">
+  <span id="similaritySliderLabel">0</span>
+</div>
+
+<div class="col" ng-show="step == 'select'">
+  <label for="palettesizeSlider">Max palette size:</label>
+  <input type="range" min="1" max="64" step="1" value="16" id="palettesizeSlider"
+	 oninput="document.getElementById('palettesizeSliderLabel').innerHTML = this.value;">
+  <span id="palettesizeSliderLabel">16</span>
 </div>
 
 <div class="col" id="loader" ng-show="step == 'load'" ng-style="loaderStyle" image-loaded="imageLoaded(img)" load-file>
@@ -28,6 +51,10 @@
     
     <button type="button" class="btn btn-secondary" ng-click="newImage()"
 	 ng-show="step == 'select' || step == 'result'">new image</button>
+
+    
+    <button type="button" class="btn btn-secondary" ng-click="autoPalette()"
+	 ng-show="step == 'select' || step == 'result'">auto palette</button>
     
     <button type="button" class="btn btn-secondary"
 	 ng-click="clearPalette()"
@@ -74,7 +101,7 @@
 </div>
 
 
-<div class="col" id="color-info" ng-show="step == 'result'">
+<div class="col" id="color-info" ng-show="step == 'result' || step == 'select'">
   <button type="button" class="btn btn-secondary"
        ng-click="showColorInfo()" ng-show="colorInfoVisible == false">show
     color info</button>

@@ -23,33 +23,13 @@ angular.module('pbnApp')
 			var rect = canvas.getBoundingClientRect();
 			var x = event.clientX - rect.left;
 			var y = event.clientY - rect.top;
-			
-			var pixels = { r: [], g: [], b: [] };
-			for (var xNear = x - 3; xNear <= x + 3; xNear ++) {
-			    for (var yNear = y - 3; yNear <= y + 3; yNear ++) {
-				var pixel = scope.ctx.getImageData(xNear, yNear, 1, 1).data;
-				pixels.r.push(pixel[0]);
-				pixels.g.push(pixel[1]);
-				pixels.b.push(pixel[2]);
-			    }
-			}
-			// var pixel = scope.ctx.getImageData(x, y, 1, 1).data;
-			// var color = {
-			// 	r: pixel[0],
-			// 	g: pixel[1],
-			// 	b: pixel[2]
-			// };
-			var mean = function(array) {
-			    return array.reduce(function(a, b) {return a + b;}, 0) / array.length;
-			};
-			var color = {
-			    x: x,
-			    y: y,
-			    r: Math.round(mean(pixels.r)),
-			    g: Math.round(mean(pixels.g)),
-			    b: Math.round(mean(pixels.b))
-			};
-			scope.addColor(color);
+
+			var sampler = document.getElementById("samplerSlider").value;
+			var threshold = document.getElementById("similaritySlider").value;
+
+			var color = scope.sampleArea(x, y, sampler);
+
+			scope.addColor(color, threshold);
 			scope.$apply();
 		    }
 		});

@@ -32,8 +32,14 @@ angular.module('pbnApp')
   	      var c = document.getElementById("img-canvas");
   	      // c.width = 800;
 	      c.width = document.getElementById("widthSlider").value;
-  	      var scale = c.width / img.naturalWidth;
-  	      c.height = img.naturalHeight * scale;
+  	      var cb = document.getElementById("resizeCheckbox");
+              if (cb.checked) {
+  	          var scale = c.width / img.naturalWidth;
+  	          c.height = img.naturalHeight * scale;
+              } else {
+                  c.width = img.naturalWidth;
+                  c.height = img.naturalHeight;
+              }
   	      document.getElementById("canvases").style.height = (c.height + 20) + "px";
   	      $scope.c = c;
   	      $scope.ctx = c.getContext("2d");
@@ -43,13 +49,50 @@ angular.module('pbnApp')
   	  };
       };
 
-      $scope.addColor = function(color) {
-  	  $scope.palette.push(color);
+      $scope.colorDistance = function(c1, c2) {
+	// See https://stackoverflow.com/a/9085524
+	var r = c1.r - c2.r;
+	var g = c1.g - c2.g;
+	var b = c2.b - c2.b;
+	var rmean = r / 2;
+	var dist = Math.sqrt((((512+rmean)*r*r)>>8) + 4*g*g + (((767-rmean)*b*b)>>8));
+	return dist;
       };
+
+      $scope.addColor = function(color, threshold) {
+	  addColorInfo(color);
+	  var mindist = -1;
+  	  for (var i = 0; i < $scope.palette.length; i++) {
+               var pcol = $scope.palette[i];
+               if ((color.r == pcol.r) && (color.g == pcol.g) && (color.b = pcol.b)) {
+                   return;
+               }
+               var dist = $scope.colorDistance(color, pcol);
+	       if ((mindist == -1) || (dist < mindist)) {
+                   mindist = dist;
+               }
+          }
+	  if ((mindist == -1) || (mindist >= threshold)) {
+		$scope.palette.push(color);
+	  }
+	  $scope.sortPalette();
+     };
 
       $scope.removeColor = function(color) {
   	  _.pull($scope.palette, color);
       };
+
+      $scope.sortPalette = function() {
+	$scope.palette = $scope.palette.sort(function(c1,c2) {
+		if (c1.hsl.h != c2.hsl.h) {
+			return c1.hsl.h > c2.hsl.h;
+		} else if (c1.hsl.s != c2.hsl.s) {
+			return c1.hsl.s > c2.hsl.s;
+		} else {
+			return c1.hsl.l > c2.hsl.l;
+		}
+	});
+     };
 
       var getNearest = function(palette, col) {
   	  var nearest;
@@ -227,12 +270,16 @@ angular.module('pbnApp')
       var getColorInfo = function(palette) {
 	  for (var i = 0; i < palette.length; i++) {
 	      var col = palette[i];
+              addColorInfo(col);
+	  }
+      };
+
+      var addColorInfo = function(col) {
 	      col.hex = rgbToHex(col.r, col.g, col.b);
 	      col.cmyk = rgbToCmyk(col.r, col.g, col.b);
 	      col.hsl = rgbToHsl(col.r, col.g, col.b);
 	      col.hsv = rgbToHsv(col.r, col.g, col.b);
-	  }
-      };
+      }
 
       $scope.pbnify = function() {
   	  $scope.step = "process";
@@ -253,7 +300,6 @@ angular.module('pbnApp')
   		  worker.terminate();
 
   		  displayResults(matSmooth, matLine, labelLocs);
-		  getColorInfo($scope.palette);  // adds hex and CMYK values for display
   		  $scope.step = "result";
   		  $scope.view = "filled";
   		  $scope.$apply();
@@ -266,6 +312,66 @@ angular.module('pbnApp')
   	  $scope.palette = [];
   	  document.getElementById("canvases").style.height = "0px";
   	  $scope.step = "load";
+      };
+
+      $scope.sampleArea = function(x, y, size) {
+	var pixels = { r: [], g: [], b: [] };
+	for (var xNear = x - size; xNear <= x + size; xNear ++) {
+		for (var yNear = y - size; yNear <= y + size; yNear ++) {
+			var pixel = $scope.ctx.getImageData(xNear, yNear, 1, 1).data;
+			pixels.r.push(pixel[0]);
+			pixels.g.push(pixel[1]);
+			pixels.b.push(pixel[2]);
+		}
+	}
+	var mean = function(array) {
+		return array.reduce(function(a, b) {return a + b;}, 0) / array.length;
+	};
+	var color = {
+		x: x,
+		y: y,
+		r: Math.round(mean(pixels.r)),
+		g: Math.round(mean(pixels.g)),
+		b: Math.round(mean(pixels.b))
+	};
+	return color;
+      };
+
+      $scope.autoPalette = function() {
+  	 var width = $scope.c.width;
+  	 var height = $scope.c.height;
+	 var maxpalettesize = document.getElementById("palettesizeSlider").value;
+	 var threshold = document.getElementById("similaritySlider").value;
+	 var sampler = document.getElementById("samplerSlider").value;
+
+	 var count = Math.sqrt(width * height);
+	 for (var i = 0; i < count; i++) {
+		if ($scope.palette.length >= maxpalettesize) {
+			return;
+		}
+		var x = Math.random() * width;
+		var y = Math.random() * height;
+		var color = $scope.sampleArea(x, y, sampler);
+		$scope.addColor(color, threshold);
+	  }
+/*
+	  for (var y = 0; y < height; y++) {
+		for (var x = 0; x < width; x++) {
+			if ($scope.palette.length >= maxpalettesize) {
+				return;
+			}
+			var pixel = $scope.ctx.getImageData(x, y, 1, 1).data;
+			var color = {
+			    x: x,
+			    y: y,
+			    r: Math.round(pixel[0]),
+			    g: Math.round(pixel[1]),
+			    b: Math.round(pixel[2])
+			};
+			$scope.addColor(color);
+		}
+	}
+*/
       };
 
       $scope.recolor = function() {
