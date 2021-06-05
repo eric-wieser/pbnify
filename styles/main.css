@@ -187,8 +187,6 @@ canvas {
 }
 
 .sample-point {
-    width: 10px;
-    height: 10px;
     border-radius: 100%;
     border: 2px solid red;
     position: absolute;
