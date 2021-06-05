@@ -61,18 +61,15 @@ angular.module('pbnApp')
 
       $scope.addColor = function(color, threshold) {
 	  addColorInfo(color);
-	  var mindist = -1;
+	  var mindist = Infinity;
   	  for (var i = 0; i < $scope.palette.length; i++) {
                var pcol = $scope.palette[i];
-               if ((color.r == pcol.r) && (color.g == pcol.g) && (color.b = pcol.b)) {
-                   return;
-               }
                var dist = $scope.colorDistance(color, pcol);
-	       if ((mindist == -1) || (dist < mindist)) {
+	       if (dist < mindist) {
                    mindist = dist;
                }
           }
-	  if ((mindist == -1) || (mindist >= threshold)) {
+	  if (mindist >= threshold) {
 		$scope.palette.push(color);
 	  }
 	  $scope.sortPalette();
