@@ -94,8 +94,8 @@
 
 <div class="col" id="palette">
   <div class="swatch" ng-repeat="color in palette" ng-style="{ 'background-color': 'rgb(' + color.r + ',' + color.g + ',' + color.b + ')' }">
-    
     <div class="swatch-label" ng-show="step == 'result' && (view == 'outline' || colorInfoVisible == true)">{{ $index + 1 }}</div>
+    <div class="swatch-hex">{{ color.hex }}</div>
     <img ng-click="removeColor(color)" ng-show="step == 'select'" src="images/delete.png">
   </div>
 </div>

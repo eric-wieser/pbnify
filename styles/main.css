@@ -122,7 +122,6 @@ a.btn {
 
 #palette {
     min-height: 70px;
-    font-size: 0px;
 }
 
 .swatch {
@@ -133,6 +132,7 @@ a.btn {
     height: 50px;
     border: 1px solid black;
     border-radius: 10px;
+    position: relative;
 }
 
 .swatch img {
@@ -163,6 +163,17 @@ a.btn {
     top: 2px;
     left: 2px;
     border-radius: 2px;
+}
+
+
+.swatch-hex {
+    font-family: monospace;
+    font-size: 10px;
+    position: absolute;
+    bottom: 0px;
+    left: 0px;
+    right: 0px;
+    text-align: center;
 }
 
 
